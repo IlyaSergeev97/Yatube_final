@@ -1,0 +1,19 @@
+<!DOCTYPE html> 
+<html lang="ru">
+{% load static %}
+{% block head %}
+{% endblock head %}
+  <body>
+    <header>
+      {% include 'includes/header.html' %}
+    </header>
+    <main>
+      {% block content %}
+      {% endblock %}
+    </main>
+    <footer>
+      {% include 'includes/footer.html' %} 
+    </footer>
+  </body>
+</div>
+</html>
