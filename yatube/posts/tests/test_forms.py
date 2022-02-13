@@ -31,13 +31,13 @@ class PostFormTest(TestCase):
             author=cls.user,
             text='Текст поста',
             group=cls.group,)
-        
+
         cls.Comment = Comment.objects.create(
             author=cls.user,
             text='Test comment',
             post=cls.post
         )
-        
+
         cls.form = PostForm()
         cls.form = CommentForm()
 
