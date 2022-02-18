@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.db import models
-from pytils.translit import slugify
 
 from .settings import FIFTY_CHARACTERS, TWO_HUNDRED_CHARACTERS
 
@@ -45,11 +44,6 @@ class Group(models.Model):
 
     def __str__(self):
         return self.title
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.title)[:FIFTY_CHARACTERS]
-        super().save(*args, **kwargs)
 
 
 class Comment(models.Model):
