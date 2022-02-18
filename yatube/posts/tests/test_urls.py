@@ -1,13 +1,13 @@
-from django.test import TestCase, Client
+
 from django.contrib.auth.models import User
-from ..models import Post, Group
+from django.core.cache import cache
+from django.test import Client, TestCase
+
+from ..models import Group, Post
+from .settings import ERROR_FOUR_HUNDRED_AND_FOUR, THE_ANSWER_IS_TWO_HUNDRED
 
 
 class PostURLTest(TestCase):
-
-    ERROR_FOUR_HUNDRED_AND_FOUR = 404
-    THE_ANSWER_IS_TWO_HUNDRED = 200
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -43,19 +43,20 @@ class PostURLTest(TestCase):
         self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(PostURLTest.user)
+        cache.clear()
 
     def test_urls_uses_correct_template(self):
         for url in self.urls:
             with self.subTest(url=url):
                 response = self.authorized_client.get(url)
                 self.assertEqual(response.status_code,
-                                 self.THE_ANSWER_IS_TWO_HUNDRED)
+                                 THE_ANSWER_IS_TWO_HUNDRED)
 
     def test_unexisting_page(self):
         """Запрос к страница unixisting_page вернет ошибку 404"""
         response = self.guest_client.get('/unixisting_page/')
         self.assertEqual(
-            response.status_code, self.ERROR_FOUR_HUNDRED_AND_FOUR)
+            response.status_code, ERROR_FOUR_HUNDRED_AND_FOUR)
 
     def test_urls_uses_correct(self):
         """URL-адрес использует соответствующий шаблон."""

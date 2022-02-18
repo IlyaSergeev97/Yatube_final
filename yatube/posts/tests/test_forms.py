@@ -1,22 +1,22 @@
 
 import shutil
 import tempfile
+
 from django.conf import settings
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from ..forms import PostForm, CommentForm
-from ..models import Post, Group, Comment
+from ..forms import PostForm
+from ..models import Comment, Group, Post
+from .settings import COUNT_ONE
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostFormTest(TestCase):
-
-    COUNT_ONE = 1
 
     @classmethod
     def setUpClass(cls):
@@ -32,14 +32,12 @@ class PostFormTest(TestCase):
             text='Текст поста',
             group=cls.group,)
 
-        cls.Comment = Comment.objects.create(
+        cls.comment = Comment.objects.create(
             author=cls.user,
             text='Test comment',
             post=cls.post
         )
-
         cls.form = PostForm()
-        cls.form = CommentForm()
 
     @classmethod
     def tearDownClass(cls):
@@ -50,9 +48,6 @@ class PostFormTest(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-    def test_create_post(self):
-        """Валидная форма создает запись в Post."""
-        posts_count = Post.objects.count()
         small_gif = (
             b'\x47\x49\x46\x38\x39\x61\x02\x00'
             b'\x01\x00\x80\x00\x00\x00\x00\x00'
@@ -61,21 +56,25 @@ class PostFormTest(TestCase):
             b'\x02\x00\x01\x00\x00\x02\x02\x0C'
             b'\x0A\x00\x3B'
         )
-        uploaded = SimpleUploadedFile(
+        self.uploaded = SimpleUploadedFile(
             name='small.gif',
             content=small_gif,
             content_type='image/gif'
         )
+
+    def test_create_post(self):
+        """Валидная форма создает запись в Post."""
+        posts_count = Post.objects.count()
         form_data = {
             'text': 'Текст поста',
-            'image': uploaded,
+            'image': self.uploaded,
         }
         self.authorized_client.post(
             reverse('group_posts:post_create'),
             data=form_data,
             follow=True
         )
-        self.assertEqual(Post.objects.count(), posts_count + self.COUNT_ONE)
+        self.assertEqual(Post.objects.count(), posts_count + COUNT_ONE)
         self.assertTrue(
             Post.objects.filter(
                 text='Текст поста',
@@ -91,15 +90,15 @@ class PostFormTest(TestCase):
         }
         self.authorized_client.post(
             reverse('group_posts:add_comment',
-                    kwargs={'post_id': self.Comment.id}),
+                    kwargs={'post_id': self.comment.id}),
             data=form_data,
             follow=True
         )
         self.assertEqual(Comment.objects.count(),
-                         cooment_count + self.COUNT_ONE)
+                         cooment_count + COUNT_ONE)
         self.assertTrue(
             Comment.objects.filter(
-                text=self.Comment.text,
+                text=self.comment.text,
             ).exists()
         )
 

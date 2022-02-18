@@ -1,25 +1,27 @@
-from typing import Any
-from django.core.paginator import Paginator
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Follow, Group, Post, User
-from .forms import PostForm, CommentForm
-from django.views.decorators.cache import cache_page
-from django.contrib.auth.decorators import login_required
 
-COUNT = 10
+from typing import Any
+
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.cache import cache_page
+
+from .forms import CommentForm, PostForm
+from .models import Follow, Group, Post, User
+from .settings import COUNT_POST, ONE_SECOND, TWENTY_SECOND
 
 
 def paginator(request: Any, query_set: Any):
-    paginator = Paginator(query_set, COUNT)
+    paginator = Paginator(query_set, COUNT_POST)
     page_number = request.GET.get('page')
     return paginator.get_page(page_number)
 
 
-@cache_page(60 * 20)
+@cache_page(TWENTY_SECOND * ONE_SECOND)
 def index(request):
     '''Функия главной страницы.'''
     title = 'Последние обновления на сайте'
-    post_list = Post.objects.all().order_by('-pub_date')
+    post_list = Post.objects.order_by('-pub_date')
     page_obj = paginator(request, post_list)
     context = {
         'title': title,
@@ -48,15 +50,10 @@ def profile(request, username):
     posts = author.posts.order_by('-pub_date')
     count_posts = posts.count()
     title = 'Все посты пользователя:'
-    user = request.user
-    if (
-            user.is_authenticated
-            and author != user
-            and Follow.objects.filter(user=user, author=author).exists()
-    ):
-        following = True
-    else:
-        following = False
+    following = (request.user.is_authenticated
+                 and request.user != author
+                 and Follow.objects.filter(user=request.user,
+                                           author=author).exists())
     page_obj = paginator(request, posts)
     context = {
         'author': author,
@@ -71,17 +68,13 @@ def profile(request, username):
 
 def post_detail(request, post_id):
     title = 'Пост'
-    post = get_object_or_404(Post, pk=post_id)
-    group = get_object_or_404(Group, id=post.group_id)
-    get_user_object = User.objects.get(pk=post.author_id)
-    user = get_user_object.get_full_name
-    post_list = Post.objects.filter(author=get_user_object)
+    post = Post.objects.get(id=post_id)
+    user = User.objects.get(pk=post.author_id)
+    post_list = Post.objects.filter(author=user)
     post_count = post_list.count()
     comments = post.comments.all()
     form = CommentForm(request.POST or None)
     context = {
-        'user': user,
-        'group': group,
         'post': post,
         'post_count': post_count,
         'title': title,
@@ -153,10 +146,10 @@ def follow_index(request):
 
 @login_required
 def profile_follow(request, username):
-    user = request.user
     author = get_object_or_404(User, username=username)
-    following = Follow.objects.filter(user=user, author=author)
-    if user != author and not following.exists():
+    following = Follow.objects.filter(user=request.user,
+                                      author=author).exists()
+    if request.user != author and not following:
         Follow.objects.create(user=request.user, author=author)
         return redirect("group_posts:profile", username)
     return redirect('group_posts:profile', author)
@@ -164,7 +157,7 @@ def profile_follow(request, username):
 
 @login_required
 def profile_unfollow(request, username):
-    user = request.user
     author = get_object_or_404(User, username=username)
-    Follow.objects.filter(author=author, user=user).delete()
-    return redirect('group_posts:profile', username=author)
+    if Follow.objects.filter(author=author, user=request.user).exists():
+        Follow.objects.get(author=author, user=request.user).delete()
+    return redirect('group_posts:profile', author)
