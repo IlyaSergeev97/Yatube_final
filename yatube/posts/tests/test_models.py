@@ -1,8 +1,9 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
 
+from yatube.settings import FIFTEEN_CHARACTERS
+
 from ..models import Group, Post
-from .settings import FIFTEEN_CHARACTERS
 
 
 class PostModelTest(TestCase):

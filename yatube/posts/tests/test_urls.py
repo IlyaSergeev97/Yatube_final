@@ -3,8 +3,10 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.test import Client, TestCase
 
+from yatube.settings import (ERROR_FOUR_HUNDRED_AND_FOUR,
+                             THE_ANSWER_IS_TWO_HUNDRED)
+
 from ..models import Group, Post
-from .settings import ERROR_FOUR_HUNDRED_AND_FOUR, THE_ANSWER_IS_TWO_HUNDRED
 
 
 class PostURLTest(TestCase):

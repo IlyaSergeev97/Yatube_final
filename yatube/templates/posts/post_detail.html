@@ -1,11 +1,7 @@
 {% extends 'base.html' %}
 {% load user_filters %}
 {% load thumbnail %}
-{% block head %}
-<head>
-  <title>{{title}} {{post.text|truncatechars:30}}</title>
-</head>
-{% endblock %}
+{% block title %}{{title}} {{post.text|truncatechars:30}}{% endblock %}
 {% block content %}
 <div class="container py-5">
   <div class="row">

@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.db import models
 
-from .settings import FIFTY_CHARACTERS, TWO_HUNDRED_CHARACTERS
+from yatube.settings import FIFTEEN_CHARACTERS, TWO_HUNDRED_CHARACTERS
 
 User = get_user_model()
 
@@ -37,7 +37,7 @@ class Group(models.Model):
                              max_length=TWO_HUNDRED_CHARACTERS, db_index=True,
                              help_text='Введите название группы')
     slug = models.SlugField('Адрес для страницы с задачей',
-                            max_length=FIFTY_CHARACTERS,
+                            max_length=FIFTEEN_CHARACTERS,
                             unique=True, db_index=True)
     description = models.TextField('Описание группы',
                                    help_text='Введите описание группы')

@@ -10,9 +10,10 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
+from yatube.settings import (FIRST_POST, ONE_POST, TEN_POST_PAGE,
+                             THIRTEEN_POSTS, THREE_POST_PAGE)
+
 from ..models import Comment, Follow, Group, Post
-from .settings import (FIRST_POST, ONE_POST, TEN_POST_PAGE, THIRTEEN_POSTS,
-                       THREE_POST_PAGE)
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 

@@ -8,11 +8,11 @@ from django.views.decorators.cache import cache_page
 
 from .forms import CommentForm, PostForm
 from .models import Follow, Group, Post, User
-from .settings import COUNT_POST, ONE_SECOND, TWENTY_SECOND
+from yatube.settings import TEN_POST_PAGE, ONE_SECOND, TWENTY_SECOND
 
 
 def paginator(request: Any, query_set: Any):
-    paginator = Paginator(query_set, COUNT_POST)
+    paginator = Paginator(query_set, TEN_POST_PAGE)
     page_number = request.GET.get('page')
     return paginator.get_page(page_number)
 
@@ -68,10 +68,8 @@ def profile(request, username):
 
 def post_detail(request, post_id):
     title = 'Пост'
-    post = Post.objects.get(id=post_id)
-    user = User.objects.get(pk=post.author_id)
-    post_list = Post.objects.filter(author=user)
-    post_count = post_list.count()
+    post = get_object_or_404(Post, pk=post_id)
+    post_count = post.author.posts.count()
     comments = post.comments.all()
     form = CommentForm(request.POST or None)
     context = {
@@ -151,7 +149,6 @@ def profile_follow(request, username):
                                       author=author).exists()
     if request.user != author and not following:
         Follow.objects.create(user=request.user, author=author)
-        return redirect("group_posts:profile", username)
     return redirect('group_posts:profile', author)
 
 

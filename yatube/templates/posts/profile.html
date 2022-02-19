@@ -1,10 +1,6 @@
 {% extends 'base.html' %}
 {% load thumbnail %}
-{% block head %}
-<head>
-  <title>{{title}} {{author.get_full_name}}</title>
-</head>
-{% endblock %}
+{% block title %}{{title}} {{author.get_full_name}}{% endblock %}
 {% block content %}
   <div class="container py-1"> 
     {% block header %}{{ название_группы }}{% endblock %}       
